@@ -43,11 +43,14 @@ defmodule NervesSSH.Exec do
       {:error, Exception.format(kind, value, __STACKTRACE__)}
   end
 
+  require Logger
+
   @doc """
   Run one Linux command coming over ssh
   """
   @spec run_sh(charlist()) :: {:ok, charlist()} | {:error, binary()}
   def run_sh(cmd) do
+    Logger.debug(to_string(cmd))
     {:ok, :os.cmd(cmd)}
   catch
     kind, value ->
