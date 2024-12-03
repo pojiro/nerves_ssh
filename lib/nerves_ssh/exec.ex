@@ -51,7 +51,8 @@ defmodule NervesSSH.Exec do
   @spec run_sh(charlist()) :: {:ok, charlist()} | {:error, binary()}
   def run_sh(cmd) do
     Logger.debug(to_string(cmd))
-    {:ok, :os.cmd(cmd)}
+    {collectable, _exit_status} = System.shell(to_string(cmd), into: IO.stream())
+    {:ok, collectable}
   catch
     kind, value ->
       {:error, Exception.format(kind, value, __STACKTRACE__)}
