@@ -25,7 +25,8 @@ defmodule NervesSSH.Options do
 
   if @otp < 23, do: raise("NervesSSH requires OTP 23 or higher")
 
-  @type language :: :elixir | :erlang | :lfe | :disabled
+  @type shell() :: :elixir | :erlang | :lfe | :disabled | :ssh.shell_spec()
+  @type exec() :: :elixir | :erlang | :lfe | :disabled | :ssh.exec_spec()
 
   @type t :: %__MODULE__{
           name: GenServer.name(),
@@ -36,8 +37,8 @@ defmodule NervesSSH.Options do
           subsystems: [:ssh.subsystem_spec()],
           system_dir: Path.t(),
           user_dir: Path.t(),
-          shell: language(),
-          exec: language(),
+          shell: shell(),
+          exec: exec(),
           iex_opts: keyword(),
           daemon_option_overrides: keyword()
         }
@@ -235,11 +236,12 @@ defmodule NervesSSH.Options do
   defp shell_opts(%{shell: :erlang}), do: []
   defp shell_opts(%{shell: :lfe}), do: [{:shell, {:lfe_shell, :start, []}}]
   defp shell_opts(%{shell: :disabled}), do: [shell: :disabled]
+  defp shell_opts(%{shell: shell_spec}), do: [shell: shell_spec]
 
   defp exec_opts(%{exec: :elixir}), do: [exec: {:direct, &NervesSSH.Exec.run_elixir/1}]
   defp exec_opts(%{exec: :erlang}), do: []
   defp exec_opts(%{exec: :lfe}), do: [exec: {:direct, &NervesSSH.Exec.run_lfe/1}]
-  defp exec_opts(%{exec: :disabled}), do: [exec: :disabled]
+  defp exec_opts(%{exec: exec_spec}), do: [exec: exec_spec]
 
   defp key_cb_opts(opts), do: [key_cb: {NervesSSH.Keys, name: opts.name}]
 
